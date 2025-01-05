@@ -1,21 +1,55 @@
 //
 //  ContentView.swift
-//  RealmAzamsharpCRUD
+//  RealmAzamsharp
 //
-//  Created by Ujjwal Arora on 04/01/25.
+//  Created by Ujjwal Arora on 03/01/25.
 //
 
 import SwiftUI
+import RealmSwift
 
 struct ContentView: View {
+    @ObservedResults(ShoppingListModel.self) var shoppingLists
+    
+    @State private var isPresented = false
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            VStack {
+                if shoppingLists.isEmpty{
+                    Text("No shopping lists!")
+                }
+                
+                List{
+                    ForEach(shoppingLists,id: \.id) { shoppingList in
+                        NavigationLink {
+                            ShoppingListItemsView(shoppingList: shoppingList)
+                        } label: {
+                            VStack{
+                                Text(shoppingList.title)
+                                Text(shoppingList.address)
+                                    .opacity(0.3)
+                            }
+                        }
+
+                        
+                    }
+                    .onDelete(perform: $shoppingLists.remove)
+                }
+            }
+            .navigationTitle("Realm Grocery App")
+            .sheet(isPresented: $isPresented, content: {
+                AddShoppingListView()
+            })
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isPresented = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
         }
-        .padding()
     }
 }
 
